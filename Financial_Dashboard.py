@@ -38,11 +38,14 @@ def get_variation(url):
     text = element.get_text(strip=True)
     return text
 
-# Example: Display a line chart
-st.subheader("S&P 500 INDEX")
-st.write(get_index('https://boursorama.com/bourse/indices/cours/%24INX/'),get_variation('https://boursorama.com/bourse/indices/cours/%24INX/'))
+def show_index(name,url):
+    # Example: Display a line chart
+    st.subheader(name)
+    st.write(get_index(url),get_variation(url))
 
-st.subheader("DOW JONES")
-st.write(get_index('https://www.boursorama.com/bourse/indices/cours/%24INDU/'),get_variation('https://www.boursorama.com/bourse/indices/cours/%24INDU/'))
+#'https://www.boursorama.com/bourse/indices/cours/%24INDU/' DOW JONES
+#'https://boursorama.com/bourse/indices/cours/%24INX/' S&P 500
 
 
+show_index('S&P 500','https://boursorama.com/bourse/indices/cours/%24INX/')
+show_index('DOW JONES','https://www.boursorama.com/bourse/indices/cours/%24INDU/')
