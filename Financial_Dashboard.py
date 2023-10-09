@@ -40,8 +40,16 @@ def get_variation(url):
 
 def show_index(name,url):
     # Example: Display a line chart
-    st.subheader(name)
+    st.markdown(name)
     st.write(get_index(url),get_variation(url))
+
+# def show_graph(url):
+#     response = requests.get(url)
+#     soup = BeautifulSoup(response.content, "html.parser")
+
+#     element = soup.find("div", class_="eod_chart")
+
+#     st.components.v1.html(element)
 
 #'https://www.boursorama.com/bourse/indices/cours/%24INDU/' DOW JONES
 #'https://boursorama.com/bourse/indices/cours/%24INX/' S&P 500
