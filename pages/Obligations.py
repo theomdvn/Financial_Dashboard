@@ -25,6 +25,11 @@ urls_oat = ['https://www.boursorama.com/bourse/taux/cours/2xFRABM2A/', #2A
             'https://www.boursorama.com/bourse/taux/cours/2xFRABM50A/' #50A
             ]
 
-show_indexes(urls_oat)
 
 
+def main():
+
+    show_indexes(urls_oat)
+
+if __name__ == "__main__":
+    main()
