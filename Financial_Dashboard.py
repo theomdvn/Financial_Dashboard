@@ -4,56 +4,75 @@ import yfinance as yf  # You can use this library to fetch financial data
 import requests
 from bs4 import BeautifulSoup
 
-# Create a sidebar for user input
-st.sidebar.title("Financial Dashboard")
+st.sidebar.title("AFIBoard")
 
-# Add widgets for user input (e.g., select indexes, date range)
-# You can use st.selectbox, st.date_input, etc.
+st.title("AFIBoard")
 
-# Create a main area to display financial data
-st.title("Financial Indexes Dashboard")
 
-# Fetch and display financial data here
-
-def get_index(url):
+def get_info(url):
     response = requests.get(url)
-    # Create a BeautifulSoup object to parse the HTML content
     soup = BeautifulSoup(response.content, "html.parser")
 
-    # Find the specific HTML element using the class name
-    element = soup.find("span", class_="c-instrument c-instrument--last")
+    name = soup.find('a', class_='c-faceplate__company-link')
+    name = name.get_text(strip=True)
+    value = soup.find("span", class_="c-instrument c-instrument--last")
+    value = value.get_text(strip=True)
+    denom = soup.find("span",class_="c-faceplate__price-currency")
+    denom = denom.get_text(strip=True)
+    variation = soup.find("span", class_="c-instrument c-instrument--variation")
+    variation = variation.get_text(strip=True)
 
-    # Extract the text within the element
-    text = element.get_text(strip=True)
-    return text
-def get_variation(url):
-    response = requests.get(url)
-    # Create a BeautifulSoup object to parse the HTML content
-    soup = BeautifulSoup(response.content, "html.parser")
-
-    # Find the specific HTML element using the class name
-    element = soup.find("span", class_="c-instrument c-instrument--variation")
-
-    # Extract the text within the element
-    text = element.get_text(strip=True)
-    return text
-
-def show_index(name,url):
-    # Example: Display a line chart
-    st.markdown(name)
-    st.write(get_index(url),get_variation(url))
-
-# def show_graph(url):
-#     response = requests.get(url)
-#     soup = BeautifulSoup(response.content, "html.parser")
-
-#     element = soup.find("div", class_="eod_chart")
-
-#     st.components.v1.html(element)
-
-#'https://www.boursorama.com/bourse/indices/cours/%24INDU/' DOW JONES
-#'https://boursorama.com/bourse/indices/cours/%24INX/' S&P 500
+    return name,value,denom,variation
 
 
-show_index('S&P 500','https://boursorama.com/bourse/indices/cours/%24INX/')
-show_index('DOW JONES','https://www.boursorama.com/bourse/indices/cours/%24INDU/')
+def show_indexes(urls):
+    data = {
+        'Name': [],
+        'Values': [],
+        'Daily Variation': []
+
+    }
+
+    for url in urls:
+        name = get_info(url)[0]
+        index_value = get_info(url)[1]
+        denom = get_info(url)[2]
+        variation_str = get_info(url)[3]
+        variation = float(variation_str.replace('%', ''))
+
+        # Set the color based on the sign of the variation
+        color = "green" if variation >= 0 else "red"
+
+        data['Name'].append(name)
+        data['Values'].append(index_value + ' ' + denom)
+        data['Daily Variation'].append(variation_str)
+
+
+        # Create a DataFrame
+    df = pd.DataFrame(data)
+
+    def color_change(val):
+        variation = float(val.rstrip('%'))
+        if variation > 0:
+            color = 'green'
+        elif variation < 0:
+            color = 'red'
+        else:
+            color = 'grey'
+        return f'color: {color}'
+        # Apply the style to the 'Variation' column
+    styled_df = df.style.map(color_change, subset=['Daily Variation'])
+        # Display the DataFrame in Streamlit
+
+    st.table(styled_df)
+
+urls = ['https://boursorama.com/bourse/indices/cours/%24INX/', #SNP500
+        'https://www.boursorama.com/bourse/indices/cours/%24INDU/', #DOWJONES
+        'https://www.boursorama.com/bourse/indices/cours/%24COMPX/', #NASDAQ
+        'https://www.boursorama.com/bourse/indices/cours/2cSX5E/', #EUROSTOXX 50
+        'https://www.boursorama.com/bourse/indices/cours/1rPCAC/', #CAC40
+        'https://www.boursorama.com/bourse/indices/cours/5pDAX/', #DAX
+        'https://www.boursorama.com/bourse/indices/cours/UKX.L/', #FTSE100
+
+        ]
+show_indexes(urls)
